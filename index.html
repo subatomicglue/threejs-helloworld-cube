@@ -14,7 +14,7 @@
       let reader = new FileReader();
       reader.onload = function (e) {
         //image.src = e.target.result;// preview image, needs <img id="image">
-        material.forEach( r => { r.map = THREE.ImageUtils.loadTexture( e.target.result ); r.needsUpdate = true; } );
+        material.forEach( r => { r.map = texloader.load( e.target.result ); r.needsUpdate = true; } );
       };
       reader.readAsDataURL(imageupload.files[0]);
     }
