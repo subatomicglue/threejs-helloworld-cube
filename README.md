@@ -2,3 +2,5 @@
 
 a simple spinning cube...
 
+![cube](screenshot.png)
+
