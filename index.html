@@ -6,6 +6,7 @@
 
   Change the cube texture:
   <input class="file-picker" type="file" id="imageupload" onchange="uploadImage(this)" name="bok" accept="image/*">
+  <input type="button" value="Download a Screenshot" onclick="downloadScreenshot()"/>
 
 <script>
 
@@ -65,6 +66,11 @@ let  texloader = new THREE.TextureLoader();
     body.appendChild(renderer.domElement);
   }
 
+  function getFrameImage() {
+    renderer.render(scene, camera);
+    return renderer.domElement.toDataURL();
+  }
+
   function go() {
     running = true;
     animate();
@@ -83,6 +89,22 @@ let  texloader = new THREE.TextureLoader();
     mesh.rotation.x += 0.01;
     mesh.rotation.y += 0.02;
     renderer.render(scene, camera);
+  }
+
+  function downloadURI(uri, name) {
+    var link = document.createElement("a");
+    link.download = name;
+    link.href = uri;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    delete link;
+  }
+
+  function downloadScreenshot() {
+    renderer.render(scene, camera);
+    let imgData = renderer.domElement.toDataURL();
+    downloadURI(imgData, "screenshot.png");
   }
 
 // start the sim
