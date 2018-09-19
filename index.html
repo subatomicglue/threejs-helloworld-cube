@@ -4,8 +4,22 @@
   </head>
   <body id="body">
 
+  Change the cube texture:
+  <input class="file-picker" type="file" id="imageupload" onchange="uploadImage(this)" name="bok" accept="image/*">
 
 <script>
+
+  function uploadImage( e ) {
+    if (imageupload.files && imageupload.files[0]) {
+      let reader = new FileReader();
+      reader.onload = function (e) {
+        //image.src = e.target.result;// preview image, needs <img id="image">
+        material.forEach( r => { r.map = THREE.ImageUtils.loadTexture( e.target.result ); r.needsUpdate = true; } );
+      };
+      reader.readAsDataURL(imageupload.files[0]);
+    }
+  }
+
 let  scene;
 let  camera;
 let  renderer;
@@ -49,8 +63,10 @@ let  texloader = new THREE.TextureLoader();
 
     console.log( document.body );
     body.appendChild(renderer.domElement);
-    running = true;
+  }
 
+  function go() {
+    running = true;
     animate();
   }
 
@@ -71,6 +87,7 @@ let  texloader = new THREE.TextureLoader();
 
 // start the sim
 init();
+go();
 </script>
 
   </body>
