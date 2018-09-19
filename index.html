@@ -1,35 +1,32 @@
 <html>
-  <head>
-  <script src="three.min.js"></script>
-  </head>
-  <body id="body">
+<head>
+<script src="three.min.js"></script>
+<style>
+  body, canvas {
+    padding: 0;
+    margin: 0;
+  }
+</style>
+</head>
+<body id="body">
 
-  Change the cube texture:
-  <input class="file-picker" type="file" id="imageupload" onchange="uploadImage(this)" name="bok" accept="image/*">
-  <input type="button" value="Download a Screenshot" onclick="downloadScreenshot()"/>
+Change the cube texture:
+<input class="file-picker" type="file" id="imageupload" onchange="uploadImage(this)" name="bok" accept="image/*">
+<input type="button" value="Download a Screenshot" onclick="downloadScreenshot()"/>
+<input type="button" value="Start" onclick="start()"/>
+<input type="button" value="Stop" onclick="stop()"/>
 
 <script>
+  let  scene;
+  let  camera;
+  let  renderer;
+  let  geometry;
+  let  material;
+  let  mesh;
+  let  running = false;
+  let  texloader = new THREE.TextureLoader();
 
-  function uploadImage( e ) {
-    if (imageupload.files && imageupload.files[0]) {
-      let reader = new FileReader();
-      reader.onload = function (e) {
-        //image.src = e.target.result;// preview image, needs <img id="image">
-        material.forEach( r => { r.map = texloader.load( e.target.result ); r.needsUpdate = true; } );
-      };
-      reader.readAsDataURL(imageupload.files[0]);
-    }
-  }
-
-let  scene;
-let  camera;
-let  renderer;
-let  geometry;
-let  material;
-let  mesh;
-let  running = false;
-let  texloader = new THREE.TextureLoader();
-
+  // initialize 3D scene
   function init() {
     let materials = [
       new THREE.MeshLambertMaterial({ color: 0xffffff, map: texloader.load( 'mantis.png' ) }),
@@ -61,36 +58,53 @@ let  texloader = new THREE.TextureLoader();
     renderer = new THREE.WebGLRenderer({ alpha: true }); // alpha transparency...
     renderer.setClearColor( 0xffffff, 0 ); // second param is opacity, 0 => transparent
     renderer.setSize(window.innerWidth, window.innerHeight);
+  }
 
-    console.log( document.body );
+  // start the draw loop
+  function start() {
+    if (running)
+      return;
     body.appendChild(renderer.domElement);
-  }
-
-  function getFrameImage() {
-    renderer.render(scene, camera);
-    return renderer.domElement.toDataURL();
-  }
-
-  function go() {
     running = true;
-    animate();
+    render();
   }
 
-  function destroy() {
+  // stop the draw loop
+  function stop() {
+    if (!running)
+      return;
     running = false;
     body.removeChild(renderer.domElement);
   }
 
-  function animate() {
-    if (!running)
-      return;
-
-    requestAnimationFrame( () => animate() );
+  // computation
+  function update() {
     mesh.rotation.x += 0.01;
     mesh.rotation.y += 0.02;
-    renderer.render(scene, camera);
   }
 
+  // draw loop (self calls when running = true, stops when running = false)
+  function render() {
+    if (!running)
+      return;
+    requestAnimationFrame( () => render() );
+    update();                       // always do computation first...
+    renderer.render(scene, camera); // then render result
+  }
+
+  // change texture map on the cube faces
+  function uploadImage( e ) {
+    if (imageupload.files && imageupload.files[0]) {
+      let reader = new FileReader();
+      reader.onload = function (e) {
+        //image.src = e.target.result;// preview image, needs <img id="image">
+        material.forEach( r => { r.map = texloader.load( e.target.result ); r.needsUpdate = true; } );
+      };
+      reader.readAsDataURL(imageupload.files[0]);
+    }
+  }
+
+  // utility to download any image uri (including data buffer that <input> upload form gives us)
   function downloadURI(uri, name) {
     var link = document.createElement("a");
     link.download = name;
@@ -101,6 +115,7 @@ let  texloader = new THREE.TextureLoader();
     delete link;
   }
 
+  // download a screenshot of the current canvas
   function downloadScreenshot() {
     renderer.render(scene, camera);
     let imgData = renderer.domElement.toDataURL();
@@ -109,7 +124,7 @@ let  texloader = new THREE.TextureLoader();
 
 // start the sim
 init();
-go();
+start();
 </script>
 
   </body>
