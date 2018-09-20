@@ -15,6 +15,8 @@ Change the cube texture:
 <input type="button" value="Download a Screenshot" onclick="downloadScreenshot()"/>
 <input type="button" value="Start" onclick="start()"/>
 <input type="button" value="Stop" onclick="stop()"/>
+<input type="button" value="RECT" onclick="useRect()"/>
+<input type="button" value="BOX" onclick="useBox()"/>
 
 <script>
   let  scene;
@@ -26,9 +28,10 @@ Change the cube texture:
   let  running = false;
   let  texloader = new THREE.TextureLoader();
 
-  // initialize 3D scene
-  function init() {
-    let materials = [
+  // utility function to define Three.js box geomerty
+  function createBoxGeo( size = 200 ) {
+    //material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+    material = [
       new THREE.MeshLambertMaterial({ color: 0xffffff, map: texloader.load( 'mantis.png' ) }),
       new THREE.MeshLambertMaterial({ color: 0xffffff, map: texloader.load( 'bobross.png' ) }),
       new THREE.MeshLambertMaterial({ color: 0xffffff, map: texloader.load( 'darthavatar.png' ) }),
@@ -36,19 +39,70 @@ Change the cube texture:
       new THREE.MeshLambertMaterial({ color: 0xffffff, map: texloader.load( 'alert.png' ) }),
       new THREE.MeshLambertMaterial({ color: 0xffffff, map: texloader.load( 'mantis.png' ) }),
     ];
+    return { geometry: new THREE.BoxGeometry(size, size, size), material: material };
+  }
 
+  // utility function to define Three.js rectangle geomerty
+  function createRectangleGeo( size = 200 ) {
+    let quad_vertices =
+    [
+      -size,  size, 0.0,
+      size,  size, 0.0,
+      size, -size, 0.0,
+      -size, -size, 0.0
+    ];
+
+    let quad_uvs =
+    [
+      0.0, 0.0,
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0
+    ];
+
+    let quad_indices =
+    [
+      0, 2, 1, 0, 3, 2
+    ];
+
+    let geometry = new THREE.BufferGeometry();
+    let vertices = new Float32Array( quad_vertices );
+    let uvs = new Float32Array( quad_uvs);
+    let indices = new Uint32Array( quad_indices )
+    geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+    geometry.addAttribute( 'uv', new THREE.BufferAttribute( uvs, 2 ) );
+    geometry.setIndex( new THREE.BufferAttribute( indices, 1 ) );
+    material = new THREE.MeshBasicMaterial( {map: texloader.load( 'mantis.png' ) } );
+    material.side = THREE.DoubleSide;
+    return { geometry: geometry, material: material  };
+  }
+
+  function useBox() {
+    if (mesh)
+      scene.remove( mesh );
+    let geo = createBoxGeo();
+    mesh = new THREE.Mesh(geo.geometry, geo.material);
+    mesh.name = "mesh";
+    scene.add( mesh );
+  }
+  function useRect() {
+    if (mesh)
+      scene.remove( mesh );
+    let geo = createRectangleGeo();
+    mesh = new THREE.Mesh(geo.geometry, geo.material);
+    mesh.name = "mesh";
+    scene.add( mesh );
+  }
+
+  // initialize 3D scene
+  function init() {
     scene = new THREE.Scene();
     //scene.background = new THREE.Color( 0xaaaaaa );
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
     camera.position.z = 1000;
 
-    geometry = new THREE.BoxGeometry(200, 200, 200);
-    //material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-    material = materials;
-
-    mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
+    useRect();
 
     //var pointLight = new THREE.PointLight( 0xffffff, 1, 0, 2 );
     //pointLight.position.set( 2, 2, 450 );
@@ -98,7 +152,11 @@ Change the cube texture:
       let reader = new FileReader();
       reader.onload = function (e) {
         //image.src = e.target.result;// preview image, needs <img id="image">
-        material.forEach( r => { r.map = texloader.load( e.target.result ); r.needsUpdate = true; } );
+        if (material.length) {
+          material.forEach( r => { r.map = texloader.load( e.target.result ); r.needsUpdate = true; } );
+        } else {
+          material.map = texloader.load( e.target.result ); material.needsUpdate = true;
+        }
       };
       reader.readAsDataURL(imageupload.files[0]);
     }
