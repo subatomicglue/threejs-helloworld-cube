@@ -10,6 +10,7 @@
     position: absolute;
     left: 0;
     top: 0;
+    z-index: -1000;
   }
 </style>
 </head>
@@ -17,9 +18,9 @@
 
 Change the cube texture:
 <input class="file-picker" type="file" id="imageupload" onchange="uploadImage(this)" name="bok" accept="image/*">
-<input type="button" value="Download a Screenshot" onclick="downloadScreenshot()"/>
+<input type="button" value="Download a Screenshot" onclick="downloadScreenshot()"/><BR>
 <input type="button" value="Start" onclick="start()"/>
-<input type="button" value="Stop" onclick="stop()"/>
+<input type="button" value="Stop" onclick="stop()"/><BR>
 <input type="button" value="RECT" onclick="useRect()"/>
 <input type="button" value="BOX" onclick="useBox()"/>
 
