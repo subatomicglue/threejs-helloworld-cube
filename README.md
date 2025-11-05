@@ -2,7 +2,9 @@
 
 a simple spinning cube...
 
-![cube](screenshot.png)
+[![cube](screenshot.png)<BR>Try it Out](https://htmlpreview.github.io/?https://raw.githubusercontent.com/subatomicglue/threejs-helloworld-cube/master/index.html)
+
+
 
 
 ## setup: install python
